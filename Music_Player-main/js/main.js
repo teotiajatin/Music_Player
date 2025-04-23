@@ -15,33 +15,33 @@ let isPlaying = false;
 window.addEventListener("load", () => {
   loadMusic(musicIndex);
 });
+
 function loadMusic(indexNumb) {
   musicName.innerHTML = allMusic[indexNumb].name;
   musicArtist.innerText = allMusic[indexNumb].artist;
   musicImg.src = allMusic[indexNumb].img;
   mainAudio.src = allMusic[indexNumb].src;
 }
+
 function playMusic() {
   isPlaying = true;
   playPauseBtn.querySelector("i").innerHTML = "pause";
-
   mainAudio.play();
 }
+
 function pauseMusic() {
   isPlaying = false;
   playPauseBtn.querySelector("i").innerHTML = "play_arrow";
-
   mainAudio.pause();
 }
+
 playPauseBtn.addEventListener("click", () => {
   isPlaying ? pauseMusic() : playMusic();
 });
 
 function nextMusic() {
   musicIndex++;
-  musicIndex > allMusic.length - 1
-    ? (musicIndex = 0)
-    : (musicIndex = musicIndex);
+  musicIndex > allMusic.length - 1 ? (musicIndex = 0) : (musicIndex = musicIndex);
   loadMusic(musicIndex);
   playMusic();
 }
@@ -49,17 +49,18 @@ function nextMusic() {
 nextBtn.addEventListener("click", () => {
   nextMusic();
 });
+
 function prevMusic() {
   musicIndex--;
-  musicIndex < 0
-    ? (musicIndex = allMusic.length - 1)
-    : (musicIndex = musicIndex);
+  musicIndex < 0 ? (musicIndex = allMusic.length - 1) : (musicIndex = musicIndex);
   loadMusic(musicIndex);
   playMusic();
 }
+
 prevBtn.addEventListener("click", () => {
   prevMusic();
 });
+
 const repeatBtn = container.querySelector("#repeat-plist");
 
 repeatBtn.addEventListener("click", () => {
@@ -79,6 +80,7 @@ repeatBtn.addEventListener("click", () => {
       break;
   }
 });
+
 mainAudio.addEventListener("ended", () => {
   let getText = repeatBtn.innerText;
   switch (getText) {
@@ -91,38 +93,41 @@ mainAudio.addEventListener("ended", () => {
       playMusic();
       break;
     case "shuffle":
-      let randIndex = Math.floor(Math.random() * allMusic.length);
+      let randIndex;
       do {
         randIndex = Math.floor(Math.random() * allMusic.length);
-      } while (musicIndex == randIndex);
-      {
-        musicIndex = randIndex;
-        loadMusic(musicIndex);
-        playMusic();
-        break;
-      }
+      } while (musicIndex === randIndex);
+      musicIndex = randIndex;
+      loadMusic(musicIndex);
+      playMusic();
+      break;
   }
 });
+
 mainAudio.addEventListener("timeupdate", (e) => {
   const currentTime = e.target.currentTime;
   const duration = e.target.duration;
   let progressWidth = (currentTime / duration) * 100;
   progressBar.style.width = `${progressWidth}%`;
+
   let musicCurrentTime = container.querySelector(".current-time"),
-    musicDuration = container.querySelector(".max-duration");
+      musicDuration = container.querySelector(".max-duration");
+
+  const interval = setInterval(() => {
+    const _elapsed = mainAudio.currentTime;
+    musicCurrentTime.innerHTML = formatTime(_elapsed);
+  }, 1000);
 
   mainAudio.addEventListener("loadeddata", () => {
-    const interval = setInterval(() => {
-      const _elapsed = mainAudio.currentTime;
-      musicCurrentTime.innerHTML = formatTime(_elapsed);
-    }, 1000);
     const _duration = mainAudio.duration;
     musicDuration.innerHTML = formatTime(_duration);
-    mainAudio.addEventListener("ended", () => {
-      clearInterval(interval);
-    });
+  });
+
+  mainAudio.addEventListener("ended", () => {
+    clearInterval(interval);
   });
 });
+
 progressArea.addEventListener("click", (e) => {
   let progressWidth = progressArea.clientWidth;
   let clickedOffsetX = e.offsetX;
@@ -134,15 +139,9 @@ progressArea.addEventListener("click", (e) => {
 
 function formatTime(time) {
   if (time && !isNaN(time)) {
-    const minutes =
-      Math.floor(time / 60) < 10
-        ? `0${Math.floor(time / 60)}`
-        : Math.floor(time / 60);
-    const seconds =
-      Math.floor(time % 60) < 10
-        ? `0${Math.floor(time % 60)}`
-        : Math.floor(time % 60);
-    return `${minutes}:${seconds}`;
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
   }
   return "00:00";
 }
